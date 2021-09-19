@@ -1,0 +1,11 @@
+#py
+./venv
+
+#data
+Homework2-Data
+
+#mac
+.DS_Store
+
+# pyCharm
+.idea
