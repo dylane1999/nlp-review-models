@@ -18,7 +18,8 @@ class NaiveBayes:
     def __init__(self):
         self.pos_files = []
         self.neg_files = []
-        self.total_num_words = 0
+        self.total_num_pos_words = 0
+        self.total_num_neg_words = 0
         self.positive_probabilities = {}
         self.positive_occurrences = {}
         self.negative_probabilities = {}
@@ -29,7 +30,7 @@ class NaiveBayes:
         return [f for f in listdir(directory) if isfile(join(directory, f))]
 
     # perform the needed text processing on the given text and export as a tokenized array
-    def process_string(self, text: str):
+    def process_string(self, text: str) -> str:
         porter = PorterStemmer()  # removes stems from words
         englishStopwords = stopwords.words("english")  # non-neccesary words
         text = text.lower()  # case folding
@@ -44,7 +45,6 @@ class NaiveBayes:
         cleaned_positive_files = []
         for file in files:
             file_path = str.format("{}/{}", dir, file)
-            print(file_path)
             with open(file_path) as f:
                 file_text_in_lines = f.readlines()
                 for line in file_text_in_lines:
@@ -71,22 +71,47 @@ class NaiveBayes:
     def train(self):
         neg_data = self.tokenize_files(self.get_files_from_dir("./data/neg"), "data/neg")
         pos_data = self.tokenize_files(self.get_files_from_dir("./data/pos"), "data/pos")
-        self.positive_occurrences = self.get_word_occurrences(pos_data)
-        self.negative_occurrences = self.get_word_occurrences(neg_data)
-        self.positive_probabilities = self.get_word_probability(self.positive_occurrences)
-        self.negative_probabilities = self.get_word_probability(self.negative_occurrences)
+        self.positive_occurrences, self.total_num_pos_words = self.get_word_occurrences(pos_data)
+        self.negative_occurrences,  self.total_num_neg_words = self.get_word_occurrences(neg_data)
+        self.positive_probabilities = self.get_word_probability(self.positive_occurrences, self.total_num_pos_words)
+        self.negative_probabilities = self.get_word_probability(self.negative_occurrences, self.total_num_neg_words)
 
-    def predictSentiment(self, input: str)-> tuple[str, int]:
+    def get_prob_of_positive(self, input: list[str]):
+        #the probability of a word being positie and the prob that each word in the input is pos
+        # word occurance + smoothening_factor / total num pos words
+        
+        probability = 1/2  # start by settign to probability of positive word
+        for word in input:
+            if word not in self.positive_occurrences:
+                numerator = 1
+            else:
+                numerator = self.positive_occurrences[word] + 1
+            probability * (numerator/self.total_num_pos_words)
+
+        return probability
+
+    def get_prob_of_negative(self, input: list[str]):
         return
 
+    def predictSentiment(self, input: str)-> tuple[str, int]:
+        processedInput = self.process_string(input)
+        pos_prob = self.get_prob_of_positive(processedInput)
+        neg_prob = self.get_prob_of_negative(processedInput)
+        # for each word assess the probablity that it is pos and that it is neg
+        for word in processedInput:
+            self.positive_occurrences
+            print(word)
+        return
+qw
 
 
 def main():
-    nltk.download("punkt")
-    nltk.download("stopwords")
+    # nltk.download("punkt")
+    # nltk.download("stopwords")
     naive = NaiveBayes()
     naive.train()
+    naive.predictSentiment("hi my name is dylan edwards and im a guy")
     return
 
-main()
-
+if __name__ == '__main__':
+    main()
