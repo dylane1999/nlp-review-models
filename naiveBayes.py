@@ -79,38 +79,42 @@ class NaiveBayes:
     def get_prob_of_positive(self, input: list[str]):
         #the probability of a word being positie and the prob that each word in the input is pos
         # word occurance + smoothening_factor / total num pos words
-        
         probability = 1/2  # start by settign to probability of positive word
         for word in input:
             if word not in self.positive_occurrences:
                 numerator = 1
             else:
                 numerator = self.positive_occurrences[word] + 1
-            probability * (numerator/self.total_num_pos_words)
-
+            probability *= (numerator/self.total_num_pos_words)
         return probability
 
     def get_prob_of_negative(self, input: list[str]):
-        return
+        #the probability of a word being positie and the prob that each word in the input is pos
+        # word occurance + smoothening_factor / total num pos words
+        probability = 1/2  # start by setting to probability of negative word
+        for word in input:
+            if word not in self.negative_occurrences:
+                numerator = 1
+            else:
+                numerator = self.positive_occurrences[word] + 1
+            probability *= (numerator/self.total_num_neg_words)
+        return probability
+
 
     def predictSentiment(self, input: str)-> tuple[str, int]:
         processedInput = self.process_string(input)
         pos_prob = self.get_prob_of_positive(processedInput)
         neg_prob = self.get_prob_of_negative(processedInput)
-        # for each word assess the probablity that it is pos and that it is neg
-        for word in processedInput:
-            self.positive_occurrences
-            print(word)
-        return
-qw
-
+        if pos_prob > neg_prob:
+            return ["positive", pos_prob]
+        return ["negative", neg_prob]
 
 def main():
     # nltk.download("punkt")
     # nltk.download("stopwords")
     naive = NaiveBayes()
     naive.train()
-    naive.predictSentiment("hi my name is dylan edwards and im a guy")
+    decison, num = naive.predictSentiment("I purchased this unit due to frequent blackouts in my area and 2 power supplies going bad.  It will run my cable modem, router, PC, and LCD monitor for 5 minutes.  This is more than enough time to save work and shut down.   Equally important, I know that my electronics are receiving clean power. I feel that this investment is minor compared to the loss of valuable data or the failure of equipment due to a power spike or an irregular power supply. As always, Amazon had it to me in &lt;2 business days")
     return
 
 if __name__ == '__main__':
