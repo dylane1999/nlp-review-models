@@ -76,37 +76,27 @@ class NaiveBayes:
         self.positive_probabilities = self.get_word_probability(self.positive_occurrences, self.total_num_pos_words)
         self.negative_probabilities = self.get_word_probability(self.negative_occurrences, self.total_num_neg_words)
 
-    def get_prob_of_positive(self, input: list[str]):
+    def calculate_naive_probaility(self, occurrences: dict, total_num_words: int, input: list[str]):
         #the probability of a word being positie and the prob that each word in the input is pos
         # word occurance + smoothening_factor / total num pos words
-        probability = 1/2  # start by settign to probability of positive word
+        probability = 1/2  # start by setting to probability of negative or possirive
         for word in input:
-            if word not in self.positive_occurrences:
+            if word not in occurrences:
                 numerator = 1
             else:
-                numerator = self.positive_occurrences[word] + 1
-            probability *= (numerator/self.total_num_pos_words)
-        return probability
-
-    def get_prob_of_negative(self, input: list[str]):
-        #the probability of a word being positie and the prob that each word in the input is pos
-        # word occurance + smoothening_factor / total num pos words
-        probability = 1/2  # start by setting to probability of negative word
-        for word in input:
-            if word not in self.negative_occurrences:
-                numerator = 1
-            else:
-                numerator = self.positive_occurrences[word] + 1
-            probability *= (numerator/self.total_num_neg_words)
+                numerator = occurrences[word] + 1
+            probability *= (numerator/total_num_words)
         return probability
 
 
-    def predictSentiment(self, tokenizedInput: list[str])-> tuple[str, int]:
-        pos_prob = self.get_prob_of_positive(tokenizedInput)
-        neg_prob = self.get_prob_of_negative(tokenizedInput)
+    def predict_sentiment_one_gram(self, tokenizedInput: list[str])-> tuple[str, int]:
+        pos_prob = self.calculate_naive_probaility(self.positive_occurrences, self.total_num_pos_words, tokenizedInput)
+        neg_prob = self.calculate_naive_probaility(self.negative_occurrences, self.total_num_neg_words, tokenizedInput)
         if pos_prob > neg_prob:
             return ["positive", pos_prob]
         return ["negative", neg_prob]
+
+
 
 def main():
     # nltk.download("punkt")
