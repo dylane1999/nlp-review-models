@@ -101,10 +101,9 @@ class NaiveBayes:
         return probability
 
 
-    def predictSentiment(self, input: str)-> tuple[str, int]:
-        processedInput = self.process_string(input)
-        pos_prob = self.get_prob_of_positive(processedInput)
-        neg_prob = self.get_prob_of_negative(processedInput)
+    def predictSentiment(self, tokenizedInput: list[str])-> tuple[str, int]:
+        pos_prob = self.get_prob_of_positive(tokenizedInput)
+        neg_prob = self.get_prob_of_negative(tokenizedInput)
         if pos_prob > neg_prob:
             return ["positive", pos_prob]
         return ["negative", neg_prob]
@@ -114,7 +113,8 @@ def main():
     # nltk.download("stopwords")
     naive = NaiveBayes()
     naive.train()
-    decison, num = naive.predictSentiment("I purchased this unit due to frequent blackouts in my area and 2 power supplies going bad.  It will run my cable modem, router, PC, and LCD monitor for 5 minutes.  This is more than enough time to save work and shut down.   Equally important, I know that my electronics are receiving clean power. I feel that this investment is minor compared to the loss of valuable data or the failure of equipment due to a power spike or an irregular power supply. As always, Amazon had it to me in &lt;2 business days")
+    processedInput = naive.process_string("I purchased this unit due to frequent blackouts in my area and 2 power supplies going bad.  It will run my cable modem, router, PC, and LCD monitor for 5 minutes.  This is more than enough time to save work and shut down.   Equally important, I know that my electronics are receiving clean power. I feel that this investment is minor compared to the loss of valuable data or the failure of equipment due to a power spike or an irregular power supply. As always, Amazon had it to me in &lt;2 business days")
+    decison, num = naive.predictSentiment(processedInput)
     return
 
 if __name__ == '__main__':
