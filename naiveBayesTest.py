@@ -7,6 +7,12 @@ class NaiveBayesTest(unittest.TestCase):
 
     def setUp(self):
         self.naive = NaiveBayes()
+
+        neg_data = self.naive.tokenize_files(self.naive.get_files_from_dir("./data/neg"), "data/neg")
+        pos_data = self.naive.tokenize_files(self.naive.get_files_from_dir("./data/pos"), "data/pos")
+        self.naive.training_positive_data, self.naive.testing_positive_data = [pos_data, pos_data]  # naive.split_data(pos_data)
+        self.naive.training_negative_data, self.naive.testing_negative_data = [neg_data, neg_data]  # naive.split_data(neg_data)
+
         self.naive.train()
 
     def test_identifying_positive_data(self):
@@ -15,7 +21,7 @@ class NaiveBayesTest(unittest.TestCase):
         total_true_positive = 0
         tokenized_pos_reviews = self.naive.tokenize_files(self.naive.get_files_from_dir("./data/pos"), "./data/pos")
         for pos_review in tokenized_pos_reviews:
-            decision, num = self.naive.predict_sentiment_one_gram(pos_review)
+            decision, num = self.naive.predict_sentiment(pos_review)
             if decision == "positive":
                 total_true_positive += 1
             if decision == "negative":

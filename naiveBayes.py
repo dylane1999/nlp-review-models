@@ -33,6 +33,10 @@ class NaiveBayes:
         self.testing_negative_data = []
         self.testing_positive_data = []
         self.porter = PorterStemmer()  # removes stems from words
+        self.positive_dict = set(opinion_lexicon.positive())
+        # neg_list=set(opinion_lexicon.negative())
+        self.positive_dict_stemmed = [self.porter.stem(word) for word in self.positive_dict ]
+        self.punctuation = string.punctuation.replace("!", "")
 
 
 
@@ -45,7 +49,7 @@ class NaiveBayes:
         englishStopwords = stopwords.words("english")  # non-neccesary words
         text = text.lower()  # case folding
         # remove punctuation
-        text = "".join([char for char in text if char not in string.punctuation])
+        text = "".join([char for char in text if char not in self.punctuation])
         words = word_tokenize(text)
         removed = [word for word in words if word not in englishStopwords]
         stemmed = [self.porter.stem(word) for word in removed]
@@ -72,13 +76,21 @@ class NaiveBayes:
 
     def get_word_occurrences(self, tokenized_files: list) -> tuple[dict, int]:
         word_occurrences = {}
+        word_occurrences["positive"] = 0
         total_num_words = 0
         for file in tokenized_files:
+            # calc number exclams
+            # calc number pos/neg/words
             for word in file:
-                total_num_words += 1
+                if self.is_word_positive(word):
+                    word_occurrences["positive"] += 1
                 if word not in word_occurrences:
                     word_occurrences[word] = 0
                 word_occurrences[word] += 1
+                total_num_words += 1
+
+        # calc number exclams
+        # calc number pos/neg/words
         return word_occurrences, total_num_words
 
     def get_word_probability(self, word_occurrences: dict, total_num_words: int) -> dict:
@@ -105,7 +117,7 @@ class NaiveBayes:
             probability *= (numerator / total_num_words)
         return probability
 
-    def predict_sentiment_one_gram(self, tokenizedInput: list[str]) -> tuple[str, int]:
+    def predict_sentiment(self, tokenizedInput: list[str]) -> tuple[str, int]:
         pos_prob = self.calculate_naive_probaility(self.positive_occurrences, self.total_num_pos_words, tokenizedInput)
         neg_prob = self.calculate_naive_probaility(self.negative_occurrences, self.total_num_neg_words, tokenizedInput)
         if pos_prob > neg_prob:
@@ -113,40 +125,37 @@ class NaiveBayes:
         return ["negative", neg_prob]
 
     def split_data(self, all_data: list[str]) -> tuple[list[str], list[str]]:
-        random.shuffle(all_data)
+        # random.shuffle(all_data)
         training_data = all_data[0:len(all_data)//2]
         testing_data = all_data[len(all_data)//2:]
         return [training_data, testing_data]
 
-    def get_num_exclams_in_text(self, raw_text: str) -> int:
+    def get_num_exclams_in_text(self, tokenized_input: list[str]) -> int:
         num_exclams = 0
-        tokenized = word_tokenize(raw_text)
-        for word in tokenized:
+        for word in tokenized_input:
             if word == "!":
                 num_exclams += 1
         return num_exclams
 
-    def get_num_of_positive_words_in_text(self, raw_text: str) -> int:
-        pos_list=set(opinion_lexicon.positive())
-        # neg_list=set(opinion_lexicon.negative())
-        positive_dict = [self.porter.stem(word) for word in pos_list]
-        words_in_text = [self.porter.stem(word) for word in word_tokenize(raw_text)]
-        num_positive = 0
-        for word in words_in_text:
-            if word in positive_dict:
-                num_positive += 1
-        return num_positive
+    def is_word_positive(self, word: str) -> bool:
+        if word in self.positive_dict or self.positive_dict_stemmed:
+            return True
+        return False
 
 
 def main():
+    naive = NaiveBayes()
     # nltk.download("punkt")
     # nltk.download("stopwords")
-    # neg_data = self.tokenize_files(self.get_files_from_dir("./data/neg"), "data/neg")
-    # pos_data = self.tokenize_files(self.get_files_from_dir("./data/pos"), "data/pos")
-    naive = NaiveBayes()
+    naive.process_string("hey!!!!")
+    neg_data = naive.tokenize_files(naive.get_files_from_dir("./data/neg"), "data/neg")
+    pos_data = naive.tokenize_files(naive.get_files_from_dir("./data/pos"), "data/pos")
+    naive.training_positive_data, naive.testing_positive_data = [pos_data, pos_data] #naive.split_data(pos_data)
+    naive.training_negative_data, naive.testing_negative_data =[neg_data, neg_data] #naive.split_data(neg_data)
+
     naive.train()
-    raw_input = "I purchased this unit due to frequent blackouts in my area and 2 power supplies going bad.  It will run my cable modem, router, PC, and LCD monitor for 5 minutes.  This is more than enough time to save work and shut down.   Equally important, I know that my electronics are receiving clean power. I feel that this investment is minor compared to the loss of valuable data or the failure of equipment due to a power spike or an irregular power supply. As always, Amazon had it to me in &lt;2 business days"
-    decison, num = naive.predict_sentiment_pos_tag(raw_input)
+    input = naive.process_string("I purchased this unit due to frequent blackouts in my area and 2 power supplies going bad.  It will run my cable modem, router, PC, and LCD monitor for 5 minutes.  This is more")
+    decison, num = naive.predict_sentiment(input)
     return
 
 
