@@ -28,7 +28,7 @@ class NaiveBayesTest(unittest.TestCase):
             total_num_events += 1
         print("total num events", total_num_events)
         print("total true positive", total_true_positive)
-        print("total false events", total_false_positive)
+        print("total false positive events", total_false_positive)
         print("total % detected succesfully", total_true_positive / total_num_events)
 
     def test_identifying_positive_data_with_pos(self):

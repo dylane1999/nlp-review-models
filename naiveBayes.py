@@ -59,9 +59,8 @@ class NaiveBayes:
         for file in files:
             file_path = str.format("{}/{}", dir, file)
             with open(file_path) as f:
-                file_text_in_lines = f.readlines()
-                for line in file_text_in_lines:
-                    cleaned_positive_files.append(self.process_string(line))
+                raw_text = f.read()
+                cleaned_positive_files.append(self.process_string(raw_text))
         return cleaned_positive_files
 
     def get_raw_text_from_files(self, files: list, dir: str) -> list:
