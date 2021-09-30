@@ -35,7 +35,7 @@ def get_raw_text_from_files(self, files: list, dir: str) -> list:
     return raw_text
 
 
-def get_word_occurrences(self, tokenized_files: list) -> tuple[dict, int]:
+def get_word_occurrences(self, tokenized_files: list):
     word_occurrences = {}
     word_occurrences["positive"] = 0
     word_occurrences["negative"] = 0
